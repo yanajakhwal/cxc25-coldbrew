@@ -69,6 +69,11 @@ python3 imputation.py
 streamlit run dashboard/Home.py
 ```
 
+### **6️⃣ Optional: View Forecasts**
+```bash
+dashboard/preprocessing/forecasting.ipynb
+```
+
 ## 🏗️ How It Works
 - The app loads investment data dynamically from **RunQL's database**, ensuring up-to-date insights.
 - Users can filter data by **year, region, sector, and funding stage**.
