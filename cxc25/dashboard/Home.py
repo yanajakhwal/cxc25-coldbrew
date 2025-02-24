@@ -10,6 +10,48 @@ st.set_page_config(
     layout="wide"
 )
 
+REPORT_PATH = "CxC_Datathon_RunQL_Report.pdf"  # Change to your actual path   
+
+with st.expander("About This Dashboard"):
+    st.write(
+        """
+        Welcome to the CxC Datathon Investment Insights Dashboard! This platform provides a 
+        comprehensive analysis of investment trends in the Canadian tech ecosystem (2019-2024).
+
+        Key Features
+        Sectoral & Regional Insights
+        - Analyze the top investment sectors and compare trends across major Canadian cities.  
+        - View total vs. average investments for various sectors and regions.  
+
+        Investor Demographics & Behavior
+        - Study investment trends by geography (Canada, US, international investors).  
+        - Compare average deal sizes per funding stage based on investor geography.  
+        - Identify leading investors and their influence on funding success.  
+
+        Funding Stages Analysis
+        - Examine funding activity across different investment stages (Seed, Series A, B, etc.).  
+        - Track deal flow trends over time and understand the most active sectors.  
+
+        Empowering Investors, Startups & Analysts 
+        This dashboard helps investors, startups, and researchers make data-driven decisions 
+        with interactive visualizations and insights into the Canadian investment landscape.
+
+        Need insights beyond the dashboard? Chat with BrewBot for real-time answers!
+
+        Download my report for detailed insights and forecasting!
+        
+        """
+    )
+    with open(REPORT_PATH, "rb") as file:
+        pdf_bytes = file.read()
+
+    # Download Button for the Report
+    st.download_button(
+        label="Download Full Report",
+        data=pdf_bytes,
+        file_name="CxC_Datathon_Report.pdf",
+        mime="application/pdf"
+    )
 ####### CSS #######
 st.markdown("""
     <style>
@@ -127,6 +169,7 @@ filtered_deals = deals_df[(deals_df["date"] >= pd.to_datetime(date_range[0])) & 
 
 st.sidebar.write("---")
 
+st.sidebar.image("dashboard/images/bb.png", use_container_width=True)  # 🔥 Replace with your logo path
 
 
 ####### METRICS #######
@@ -405,7 +448,6 @@ st.plotly_chart(fig, use_container_width=True)
 num_categories = st.slider("Select Number of Top Sectors:", min_value=1, max_value=50, value=10, step=1, key="num_sectors")
 num_regions = st.slider("Select Number of Top Regions:", min_value=1, max_value=20, value=5, step=1, key="num_regions")
 
-investment_type = st.radio("Select Investment Type:", ["Total Investment", "Average Investment"], key="investment_type")
 heatmap_metric = st.radio("Choose Heatmap Metric:", ["Number of Deals", "Total Investment"], key="heatmap_metric")
 
 top_regions = (
@@ -501,6 +543,8 @@ with col2:
         fig3 = px.bar(sector_dist, x="count", y="primaryTag", orientation="h", labels={"primaryTag": "Sector", "count": "Number of Deals"}, color="count", color_continuous_scale="magma")
 
     st.plotly_chart(fig3, use_container_width=True)
+
+investment_type = st.radio("Select Investment Type:", ["Total Investment", "Average Investment"], key="investment_type")
 
 ####### Investment by Sector #######
 st.subheader(f"{investment_type} of Top {num_categories} Sectors")

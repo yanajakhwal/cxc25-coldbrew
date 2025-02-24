@@ -8,11 +8,16 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import time
 import numpy as np
+import dotenv
+import os
+
+dotenv.load_dotenv()
+gemini_api_key = os.getenv("GEMINI_API_KEY")
 
 df = pd.read_csv("data/companies_cleaned.csv")
 missing_companies = df[df["dateFounded"].isna()][["companyName", "ecosystemName"]].dropna().values.tolist()
 
-genai.configure(api_key="AIzaSyCgqbcwAg0-gzrYWS3u5r4vRvOOqfntyoA")  # Replace with your actual API key
+genai.configure(api_key=gemini_api_key)  # Replace with your actual API key
 
 def get_google_search_results(company_name, location):
     """Search Google for the company's full founding date using name and location."""
