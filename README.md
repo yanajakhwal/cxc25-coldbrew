@@ -24,10 +24,12 @@ This dashboard provides in-depth analysis and forecasting for the **Canadian sta
 │   ├── 📂 images               # Stores icons and other UI assets
  ###### MUST BE EXPORTED FROM RUNQL ########
 ├── 📂 data
-│   ├── deals.csv               # Investment deals dataset
-│   ├── dealInvestor.csv        # Deal-Investor mapping
-│   ├── companies.csv           # Company details dataset
-│   ├── investors.csv           # Investor details dataset
+│   ├── 📂 raw_data
+│   │   ├── deals.csv               # Investment deals dataset
+│   │   ├── dealInvestor.csv        # Deal-Investor mapping
+│   │   ├── companies.csv           # Company details dataset
+│   │   ├── investors.csv           # Investor details dataset
+│   │── 
 ├── 📂 processing                 
 │   ├── EDA.ipynb               # Exploratory Data Analysis
 │   ├── exploring.ipynb         # Deal-Investor mapping
