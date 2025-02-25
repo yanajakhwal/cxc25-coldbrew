@@ -573,4 +573,3 @@ fig5 = px.bar(
 )
 st.plotly_chart(fig5, use_container_width=True)
 
-
