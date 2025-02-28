@@ -179,39 +179,96 @@ st.subheader("Average Deal Size by Stage & Geography")
 st.plotly_chart(fig, use_container_width=True)
 
 # Most Active Investment Firms Analysis
-st.sidebar.header("Investment Firm Activity")
-top_n = st.sidebar.slider("Select Top Firms", 5, 20, 10)
-chart_type = st.sidebar.radio("Choose Chart Type", [ "Pie Chart", "Bar Chart"])
 
-firm_activity = dealInvestor_df.groupby(["investorName", "year"])["dealId"].nunique().reset_index()
-firm_activity.columns = ["Investor Name", "Year", "Number of Deals"]
-selected_year = st.sidebar.selectbox("Select Year", sorted(dealInvestor_df["year"].unique(), reverse=True))
 
-if chart_type == "Pie Chart":
-    firm_activity = firm_activity[firm_activity["Year"] == selected_year]
 
-top_firms = firm_activity.groupby("Investor Name")["Number of Deals"].sum().nlargest(top_n).index
-filtered_firm_activity = firm_activity[firm_activity["Investor Name"].isin(top_firms)]
 
-if chart_type == "Bar Chart":
-    fig = px.bar(
-        filtered_firm_activity, x="Year", y="Number of Deals", color="Investor Name",
-        text_auto=True, labels={"Year": "Year", "Number of Deals": "Investment Deals"},
-        barmode="stack", color_discrete_sequence=px.colors.sequential.Magma
-    )
-else:
+col1, col2 = st.columns([1, 2])
+
+with col1:
+    @st.cache_data
+    def load_data():
+        deals_df = pd.read_csv("data/deals_updated.csv")
+        deal_investors_df = pd.read_csv("data/dealInvestor_updated.csv")
+
+        # Clean column names (strip spaces)
+        deals_df.columns = deals_df.columns.str.strip()
+        deal_investors_df.columns = deal_investors_df.columns.str.strip()
+
+        # **Create a mapping of dealId -> investorCountry**
+        deal_to_country = deal_investors_df.set_index("dealId")["investorCountry"].to_dict()
+
+        # **Apply mapping to deals_df**
+        deals_df["investorCountry"] = deals_df["id"].map(deal_to_country)
+
+        # Drop deals with no investor country info
+        deals_df = deals_df.dropna(subset=["investorCountry"])
+
+        return deals_df
+
+    df = load_data()
+    min_year, max_year = df["year"].min(), df["year"].max()
+    selected_years = st.sidebar.slider("Select Year Range", min_year, max_year, (min_year, max_year))
+
+    # Filter based on selected year
+    filtered_df = df[df["year"].between(selected_years[0], selected_years[1])]
+
+    # ✅ Aggregate data: Count the number of deals per country
+    country_deals = filtered_df["investorCountry"].value_counts().reset_index()
+    country_deals.columns = ["Investor Country", "Number of Deals"]
+
+    # **Create an interactive pie chart**
+    st.subheader("Distribution of Investment Deals by Country")
     fig = px.pie(
-        filtered_firm_activity, names="Investor Name", values="Number of Deals",
-        # title=f"Most Active {top_n} Firms in {selected_year[:4]}",
-        labels={"Investor Name": "Investment Firm", "Number of Deals": "Investment Deals"},
-        color_discrete_sequence=px.colors.sequential.Magma
+        country_deals,
+        names="Investor Country",
+        values="Number of Deals",
+        hole=0.4,  # Donut-style chart
+        color_discrete_sequence=px.colors.sequential.Magma,
     )
 
-fig.update_layout(
-    plot_bgcolor="#0e1117", paper_bgcolor="#0e1117",
-    font=dict(color="white", family="Courier New, monospace"),
-    margin=dict(l=0, r=0, t=50, b=0)
-)
+    fig.update_layout(
+        title_text="Investment Deals by Country",
+        title_x=0.5,
+    )
 
-st.subheader(f"Most Active {top_n} Firms in {str(selected_year)[:4]}")
-st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True)
+
+with col2:
+    top_n = st.sidebar.slider("Select Top Firms", 5, 20, 10)
+    chart_type = st.sidebar.radio("Choose Chart Type", [ "Pie Chart", "Bar Chart"])
+
+    firm_activity = dealInvestor_df.groupby(["investorName", "year"])["dealId"].nunique().reset_index()
+    firm_activity.columns = ["Investor Name", "Year", "Number of Deals"]
+    selected_year = st.sidebar.selectbox("Select Year", sorted(dealInvestor_df["year"].unique(), reverse=True))
+
+    if chart_type == "Pie Chart":
+        firm_activity = firm_activity[firm_activity["Year"] == selected_year]
+
+    top_firms = firm_activity.groupby("Investor Name")["Number of Deals"].sum().nlargest(top_n).index
+    filtered_firm_activity = firm_activity[firm_activity["Investor Name"].isin(top_firms)]
+
+    if chart_type == "Bar Chart":
+        fig = px.bar(
+            filtered_firm_activity, x="Year", y="Number of Deals", color="Investor Name",
+            text_auto=True, labels={"Year": "Year", "Number of Deals": "Investment Deals"},
+            barmode="stack", color_discrete_sequence=px.colors.sequential.Magma
+        )
+    else:
+        fig = px.pie(
+            filtered_firm_activity, names="Investor Name", values="Number of Deals",
+            # title=f"Most Active {top_n} Firms in {selected_year[:4]}",
+            labels={"Investor Name": "Investment Firm", "Number of Deals": "Investment Deals"},
+            color_discrete_sequence=px.colors.sequential.Magma
+        )
+
+    fig.update_layout(
+        plot_bgcolor="#0e1117", paper_bgcolor="#0e1117",
+        font=dict(color="white", family="Courier New, monospace"),
+        margin=dict(l=0, r=0, t=50, b=0)
+    )
+
+    st.subheader(f"Most Active {top_n} Firms in {str(selected_year)[:4]}")
+    st.plotly_chart(fig, use_container_width=True)
+
+
